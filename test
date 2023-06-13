@@ -4,6 +4,8 @@ std::vector<double> generate_candidates(const std::vector<Data>& variables, int 
 
     int max_attempts = std::numeric_limits<int>::max(); // 繰り返しの上限
 
+    const int report_threshold = 10000; // 1万回の試行が終了した時点で報告する
+
     for (int attempts = 0; attempts < max_attempts; ++attempts) {
         double remaining = 1.0;
         std::vector<double> temp_candidates;
@@ -18,8 +20,13 @@ std::vector<double> generate_candidates(const std::vector<Data>& variables, int 
                 return candidates;
             }
         }
+
+        // 1万回の試行が終了し、1つも候補が得られなかった場合
+        if (attempts == report_threshold - 1 && candidates.empty()) {
+            std::cout << "Error: Unable to generate a single valid candidate after " << report_threshold << " attempts.\n";
+            return candidates;
+        }
     }
 
-    std::cout << "Error: Unable to generate enough valid candidates.\n";
     return candidates;
 }
