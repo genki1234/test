@@ -3,16 +3,19 @@ std::vector<double> generate_candidates(const std::vector<Data>& variables, int 
     std::mt19937 gen(seed);
 
     int max_attempts = std::numeric_limits<int>::max(); // 繰り返しの上限
-
     const int report_threshold = 10000; // 1万回の試行が終了した時点で報告する
 
     for (int attempts = 0; attempts < max_attempts; ++attempts) {
-        double remaining = 1.0;
         std::vector<double> temp_candidates;
         for (const auto& var : variables) {
-            // 同じ変数の値を生成する部分は変わりません
-            // ...
+            int steps = static_cast<int>((var.max_val - var.min_val) / var.interval);
+            std::uniform_int_distribution<> dis(0, steps);
+
+            double val = var.min_val + dis(gen) * var.interval;
+
+            temp_candidates.push_back(val);
         }
+
         if (evaluate_candidate(temp_candidates, setting)) {
             candidates.insert(candidates.end(), temp_candidates.begin(), temp_candidates.end());
             // 既定の生成数に達したらループを抜ける
