@@ -1,0 +1,39 @@
+std::vector<double> generate_candidates(const std::vector<Data>& variables, int num_candidates, int seed) {
+    std::vector<double> candidates;
+    std::mt19937 gen(seed);
+
+    int max_attempts = std::numeric_limits<int>::max(); // 繰り返しの上限
+    const int report_threshold = 10000; // 1万回の試行が終了した時点で報告する
+
+    for (int attempts = 0; attempts < max_attempts; ++attempts) {
+        std::vector<double> temp_candidates;
+        for (const auto& var : variables) {
+            int steps = static_cast<int>((var.max_val - var.min_val) / var.interval);
+            std::uniform_int_distribution<> dis(0, steps);
+
+            double val = var.min_val + dis(gen) * var.interval;
+
+            temp_candidates.push_back(val);
+        }
+
+        if (evaluate_candidate(temp_candidates, setting)) {
+            candidates.insert(candidates.end(), temp_candidates.begin(), temp_candidates.end());
+            // 既定の生成数に達したらループを抜ける
+            if (candidates.size() >= num_candidates * variables.size()) {
+                // 最後の候補としてmax_valを明示的に追加
+                for (const auto& var : variables) {
+                    candidates.push_back(var.max_val);
+                }
+                return candidates;
+            }
+        }
+
+        // 1万回の試行が終了し、1つも候補が得られなかった場合
+        if (attempts == report_threshold - 1 && candidates.empty()) {
+            std::cout << "Error: Unable to generate a single valid candidate after " << report_threshold << " attempts.\n";
+            return candidates;
+        }
+    }
+
+    return candidates;
+}
