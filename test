@@ -20,6 +20,10 @@ std::vector<double> generate_candidates(const std::vector<Data>& variables, int 
             candidates.insert(candidates.end(), temp_candidates.begin(), temp_candidates.end());
             // 既定の生成数に達したらループを抜ける
             if (candidates.size() >= num_candidates * variables.size()) {
+                // 最後の候補としてmax_valを明示的に追加
+                for (const auto& var : variables) {
+                    temp_candidates.back() = var.max_val;
+                }
                 return candidates;
             }
         }
