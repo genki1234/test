@@ -1,34 +1,52 @@
-std::vector<double> generate_candidates(const std::vector<Data>& variables, int num_candidates, int seed, const Setting& setting) {
-    std::vector<double> candidates;
-    std::mt19937 gen(seed);
+upstream apservers {
+    server 127.0.0.1:3000;
+}
 
-    int max_attempts = std::numeric_limits<int>::max();
+server {
+    listen 80;
 
-    for (int attempts = 0; attempts < max_attempts; ++attempts) {
-        std::vector<double> temp_candidates;
-        for (const auto& var : variables) {
-            int steps = static_cast<int>((var.max_val - var.min_val) / var.interval) + 1; // +1 to include max_val
-            std::uniform_int_distribution<> dis(0, steps);
+    proxy_set_header    X-Real-IP       $remote_addr;
+    proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header    Host            $http_host;
+    proxy_redirect      off;
 
-            double val = var.min_val + dis(gen) * var.interval;
+    proxy_max_temp_file_size    0;
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods "POST, GET, OPTIONS";
+    add_header Access-Control-Allow-Headers "Origin, Authorization, Accept";
+    add_header Access-Control-Allow-Credentials true;
 
-            // Clip the value to max_val
-            if (val > var.max_val) {
-                val = var.max_val;
-            }
-
-            temp_candidates.push_back(val);
-        }
-
-        if (evaluate_candidate(temp_candidates, setting)) {
-            candidates.insert(candidates.end(), temp_candidates.begin(), temp_candidates.end());
-
-            // If we've generated enough candidates, return them
-            if (candidates.size() >= num_candidates * variables.size()) {
-                return candidates;
-            }
-        }
+    location /employrelation_front/corporate/employee {
+        alias /home/ec2-user/app/kirihare-form-web/client/build;
+        try_files $uri $uri/ /index.html;
     }
 
-    return candidates;
+    location /employrelation_front/corporate/investigate {
+        alias /home/ec2-user/app/kirihare-form-web/client/build;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /employrelation_front/corporate/reviewMember {
+        alias /home/ec2-user/app/kirihare-form-web/client/build;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /employrelation_api/ {
+        proxy_pass http://127.0.0.1:3900;
+    }
+
+    location / {
+        allow 202.220.202.67;
+        allow 202.220.209.56;
+        allow all;
+        proxy_pass http://apservers;
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header Access-Control-Max-Age 7200;
+            add_header Content-Type 'text/plain charset=UTF-8';
+            add_header Content-Length 0;
+            return 204;
+        }
+    }
 }
