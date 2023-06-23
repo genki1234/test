@@ -1,33 +1,18 @@
-import plotly.graph_objects as go
-import plotly.express as px
+import axios from 'axios';
 
-# データセットのロード
-df = px.data.iris()
+axios.defaults.timeout = 600000; // 600000 milliseconds = 10 minutes
 
-# label_colが存在する場合、その列を削除
-if label_col:
-    df = df.drop([label_col], axis=1)
-    save_path = path
+http {
+    ...
+    proxy_read_timeout 600s;
+    proxy_connect_timeout 600s;
+    ...
+}
 
-# dimensionsのリストを作成
-dimensions = [dict(label=col, values=df[col]) for col in df.columns if col != target_col]
 
-# target_colが数値の列で存在する場合
-if target_col and target_col in df.select_dtypes(include='number').columns:
-    fig = go.Figure(data=
-        go.Parcoords(
-            line=dict(color=df[target_col],
-                      colorscale=px.colors.sequential.Jet),
-            dimensions=dimensions
-        )
-    )
-else:
-    fig = go.Figure(data=
-        go.Parcoords(
-            dimensions=dimensions
-        )
-    )
-
-# HTMLファイルとして保存
-config = {'staticPlot': True}
-fig.write_html(save_path, config=config, include_plotlyjs='cdn')
+http {
+    ...
+    proxy_read_timeout 300s;
+    proxy_connect_timeout 75s;
+    ...
+}
