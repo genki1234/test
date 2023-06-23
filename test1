@@ -4,14 +4,19 @@ import plotly.express as px
 # データセットのロード
 df = px.data.iris()
 
-# dimensionsのリストを作成します
-dimensions = [dict(label=col, values=df[col]) for col in df.columns if col != 'species_id']
+# label_colが存在する場合、その列を削除
+if label_col:
+    df = df.drop([label_col], axis=1)
+    save_path = path
 
-# a の値に基づいてプロットを作成
-if a == True:
+# dimensionsのリストを作成
+dimensions = [dict(label=col, values=df[col]) for col in df.columns if col != target_col]
+
+# target_colが数値の列で存在する場合
+if target_col and target_col in df.select_dtypes(include='number').columns:
     fig = go.Figure(data=
         go.Parcoords(
-            line=dict(color=df['species_id'],
+            line=dict(color=df[target_col],
                       colorscale=px.colors.sequential.Jet),
             dimensions=dimensions
         )
@@ -25,5 +30,4 @@ else:
 
 # HTMLファイルとして保存
 config = {'staticPlot': True}
-path = "output.html"  # 保存するHTMLファイルのパス
-fig.write_html(path, config=config, include_plotlyjs='cdn')
+fig.write_html(save_path, config=config, include_plotlyjs='cdn')
