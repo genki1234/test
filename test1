@@ -1,16 +1,29 @@
-fig = go.Figure(data=
-    go.Parcoords(
-        line=dict(color=df['species_id'],
-                  colorscale=px.colors.qualitative.Set1),
-        dimensions=[
-            dict(range=[4, 8], label='sepal_width', values=df['sepal_width']),
-            dict(range=[2, 7], label='sepal_length', values=df['sepal_length']),
-            dict(range=[0, 2.5], label='petal_width', values=df['petal_width']),
-            dict(range=[1, 7], label='petal_length', values=df['petal_length'])
-        ]
+import plotly.graph_objects as go
+import plotly.express as px
+
+# データセットのロード
+df = px.data.iris()
+
+# dimensionsのリストを作成します
+dimensions = [dict(label=col, values=df[col]) for col in df.columns if col != 'species_id']
+
+# a の値に基づいてプロットを作成
+if a == True:
+    fig = go.Figure(data=
+        go.Parcoords(
+            line=dict(color=df['species_id'],
+                      colorscale=px.colors.sequential.Jet),
+            dimensions=dimensions
+        )
     )
-)
+else:
+    fig = go.Figure(data=
+        go.Parcoords(
+            dimensions=dimensions
+        )
+    )
 
 # HTMLファイルとして保存
 config = {'staticPlot': True}
-fig.write_html("output.html", config=config, include_plotlyjs='cdn')
+path = "output.html"  # 保存するHTMLファイルのパス
+fig.write_html(path, config=config, include_plotlyjs='cdn')
