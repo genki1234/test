@@ -1,18 +1,28 @@
-import axios from 'axios';
+<template>
+  <div id="app">
+    <input type="text" :value="text" @input="updateText" @keyup="insertTextAtCursor($event, 'aaa')" />
 
-axios.defaults.timeout = 600000; // 600000 milliseconds = 10 minutes
+    <p>テキストボックスの内容: <span>{{ text }}</span></p>
+  </div>
+</template>
 
-http {
-    ...
-    proxy_read_timeout 600s;
-    proxy_connect_timeout 600s;
-    ...
-}
+<script>
+import { ref } from 'vue';
 
+export default {
+  setup() {
+    const text = ref("");
 
-http {
-    ...
-    proxy_read_timeout 300s;
-    proxy_connect_timeout 75s;
-    ...
-}
+    const updateText = (event) => {
+      text.value = event.target.value;
+    };
+
+    const insertTextAtCursor = (event, insertText) => {
+      const position = event.target.selectionStart;
+      text.value = text.value.slice(0, position) + insertText + text.value.slice(position);
+    };
+
+    return { text, updateText, insertTextAtCursor };
+  },
+};
+</script>
